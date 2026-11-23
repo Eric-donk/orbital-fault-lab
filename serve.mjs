@@ -6,7 +6,7 @@ const types = {
   "site.css": "text/css; charset=utf-8",
   "app.mjs": "text/javascript; charset=utf-8",
   "model.mjs": "text/javascript; charset=utf-8",
-  "orbit.png": "image/png",
+  "orbit.webp": "image/webp",
 };
 
 createServer(async (request, response) => {

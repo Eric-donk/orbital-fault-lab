@@ -40,7 +40,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible, .option:has(:focus
 .hero::before {
   position: absolute; content: ""; inset: 0; z-index: -1;
   background: linear-gradient(90deg, #0b1426 0%, #0b1426eb 26%, #0b14264d 56%, #0b142600 100%),
-    url("./orbit.png") right 43% / cover no-repeat;
+    url("./orbit.webp") right 43% / cover no-repeat;
 }
 .alert { font-size: 13px; font-weight: 650; color: #ffd3a4; display: flex; align-items: center; gap: 9px; }
 .alert span { width: 8px; height: 8px; border-radius: 50%; background: #ffaf61; box-shadow: 0 0 12px #ffaf6170; }
