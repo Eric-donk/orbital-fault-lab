@@ -147,6 +147,7 @@ $("next").addEventListener("click", () => {
   $("announcement").textContent = `第 ${mission} 局已开始。`;
   renderTelemetry();
   $("telemetry-title").scrollIntoView({ block: "start" });
+  form.querySelector("input").focus({ preventScroll: true });
 });
 
 function showExperiment() {
@@ -190,8 +191,9 @@ function showExperiment() {
       cell.classList.toggle("match", column === index);
     });
   });
-  const difference = 100 * (results.noisy.correct - results.baselineNoisy.correct) / results.total;
-  $("experiment-note").textContent = `同样的干扰下，比较分段均值比比较首尾单点多识别对 ${results.noisy.correct - results.baselineNoisy.correct} 个案例（+${difference.toFixed(1)} 个百分点）。`;
+  const difference = results.noisy.correct - results.baselineNoisy.correct;
+  const change = 100 * difference / results.total;
+  $("experiment-note").textContent = `同样的干扰下，分段均值版与首尾单点版相比，正确数变化为 ${difference > 0 ? "+" : ""}${difference} 个（${change > 0 ? "+" : ""}${change.toFixed(1)} 个百分点）。`;
   reportReady = true;
 }
 
