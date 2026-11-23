@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080e1c">
+  <meta name="description" content="用三条模拟遥测曲线和机器学习一起诊断虚拟卫星。">
+  <title>轨道故障台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./site.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="identity" href="./" aria-label="轨道故障台首页">
+        <span class="identity-icon" aria-hidden="true">◎</span>
+        <span>轨道故障台 <small>ORBITAL FAULT LAB</small></span>
+      </a>
+      <a class="jump" href="#experiment">模型实验</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <div class="alert"><span></span> 模拟卫星告警</div>
+        <h1 id="title">轨道故障台</h1>
+        <p>三条遥测曲线，一次故障。<br>先做判断，再看看模型会怎么选。</p>
+      </div>
+      <div class="mission" aria-label="当前局次">
+        <span>当前任务</span><strong id="mission-id">ORB-01</strong>
+      </div>
+    </section>
+
+    <div class="console">
+      <section class="panel telemetry" aria-labelledby="telemetry-title">
+        <div class="panel-head">
+          <div><h2 id="telemetry-title">遥测回放</h2><p>0–17 分钟 · 各通道已缩放到 0–100</p></div>
+          <span id="signal-mode" class="tag">原始信号</span>
+        </div>
+        <div id="charts" class="charts">
+          <figure class="channel thermal">
+            <figcaption><span><i></i>温度</span><output id="value-0"></output></figcaption>
+            <canvas id="chart-0" role="img"></canvas>
+          </figure>
+          <figure class="channel power">
+            <figcaption><span><i></i>电量</span><output id="value-1"></output></figcaption>
+            <canvas id="chart-1" role="img"></canvas>
+          </figure>
+          <figure class="channel signal">
+            <figcaption><span><i></i>信号强度</span><output id="value-2"></output></figcaption>
+            <canvas id="chart-2" role="img"></canvas>
+          </figure>
+        </div>
+      </section>
+
+      <section class="panel diagnosis" aria-labelledby="diagnosis-title">
+        <div class="panel-head"><div><h2 id="diagnosis-title">判断故障</h2><p id="diagnosis-step">选择一种最可能的原因</p></div></div>
+        <form id="diagnose">
+          <fieldset id="options">
+            <legend class="sr-only">可能的故障原因</legend>
+            <label class="option thermal"><input type="radio" name="fault" value="thermal"><span class="option-dot"></span><span>温控异常</span></label>
+            <label class="option power"><input type="radio" name="fault" value="power"><span class="option-dot"></span><span>供电异常</span></label>
+            <label class="option signal"><input type="radio" name="fault" value="signal"><span class="option-dot"></span><span>通信异常</span></label>
+          </fieldset>
+          <button class="primary" id="submit" type="submit" disabled>提交判断</button>
+        </form>
+
+        <div id="result" class="result" hidden>
+          <div class="answer-grid">
+            <div><span>模拟设定</span><strong id="truth"></strong></div>
+            <div><span>你的判断</span><strong id="human-guess"></strong></div>
+          </div>
+          <div class="model-answer">
+            <span>模型判断</span>
+            <strong id="model-guess"></strong>
+            <div class="votes" id="votes" aria-hidden="true"></div>
+            <p id="vote-text"></p>
+          </div>
+          <p id="clue"></p>
+          <p id="comparison" class="comparison"></p>
+          <div class="actions">
+            <button id="noise" type="button" class="secondary">增加干扰</button>
+            <button id="next" type="button" class="primary">再来一局</button>
+          </div>
+        </div>
+        <p class="sr-only" id="announcement" role="status"></p>
+      </section>
+    </div>
+
+    <details class="panel experiment" id="experiment">
+      <summary><span><strong>模型实验</strong><small>同一批案例，加干扰会怎样？</small></span><span aria-hidden="true" class="expand">＋</span></summary>
+      <div class="experiment-body">
+        <p>5 近邻分类器使用 360 个模拟案例学习。以下三组结果使用同一批独立的 180 个案例（每类 60 个）。加干扰前后保留原有故障标签。</p>
+        <div class="metric-grid" id="metrics"></div>
+        <h3>加干扰后 · 分段均值模型的错判分布</h3>
+        <div class="table-wrap"><table id="matrix"></table></div>
+        <p id="experiment-note" class="muted"></p>
+        <p class="muted">早期版本取首尾单点之差。当前版本比较前 4 点与后 5 点的均值，再让最相近的 5 个样本投票。两版均使用同一批训练案例。</p>
+      </div>
+    </details>
+    <footer>课堂模拟作品 · 遥测数值与故障均由程序生成</footer>
+  </main>
+</body>
+</html>
