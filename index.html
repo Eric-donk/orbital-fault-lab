@@ -26,12 +26,20 @@
       <div class="hero-copy">
         <div class="alert"><span></span> 模拟卫星告警</div>
         <h1 id="title">轨道故障台</h1>
-        <p>三条遥测曲线，一次故障。<br>先做判断，再看看模型会怎么选。</p>
+        <p>读三条遥测曲线，判断卫星状态。<br>提交后，对照模型的结论。</p>
       </div>
       <div class="mission" aria-label="当前局次">
         <span>当前任务</span><strong id="mission-id">ORB-01</strong>
       </div>
     </section>
+
+    <div class="mission-bar">
+      <div class="mode-picker" role="group" aria-label="任务模式">
+        <button type="button" id="basic-mode" aria-pressed="true">基础演练</button>
+        <button type="button" id="advanced-mode" aria-pressed="false">进阶诊断</button>
+      </div>
+      <output id="score" aria-live="polite">本次答对 0 / 0</output>
+    </div>
 
     <div class="console">
       <section class="panel telemetry" aria-labelledby="telemetry-title">
@@ -53,6 +61,10 @@
             <canvas id="chart-2" role="img"></canvas>
           </figure>
         </div>
+        <label class="range-control" for="minute">
+          <span>回放定位 <output id="minute-readout" for="minute">第 17 分钟</output></span>
+          <input id="minute" type="range" min="0" max="17" step="1" value="17">
+        </label>
       </section>
 
       <section class="panel diagnosis" aria-labelledby="diagnosis-title">
@@ -64,13 +76,20 @@
             <label class="option power"><input type="radio" name="fault" value="power"><span class="option-dot"></span><span>供电异常</span></label>
             <label class="option signal"><input type="radio" name="fault" value="signal"><span class="option-dot"></span><span>通信异常</span></label>
           </fieldset>
+          <fieldset id="multi-options" hidden disabled>
+            <legend class="sr-only">请选择设备正常或最多两种故障</legend>
+            <label class="option healthy"><input type="checkbox" name="advanced-fault" value="none">设备正常</label>
+            <label class="option thermal"><input type="checkbox" name="advanced-fault" value="thermal">温控异常</label>
+            <label class="option power"><input type="checkbox" name="advanced-fault" value="power">供电异常</label>
+            <label class="option signal"><input type="checkbox" name="advanced-fault" value="signal">通信异常</label>
+          </fieldset>
           <button class="primary" id="submit" type="submit" disabled>提交判断</button>
         </form>
 
         <div id="result" class="result" hidden>
           <div class="answer-grid">
             <div><span>模拟设定</span><strong id="truth"></strong></div>
-            <div><span>你的判断</span><strong id="human-guess"></strong></div>
+            <div><span>你的判断</span><strong id="human-guess"></strong><small id="human-mark"></small></div>
           </div>
           <div class="model-answer">
             <span>模型判断</span>
@@ -79,6 +98,11 @@
             <p id="vote-text"></p>
           </div>
           <p id="clue"></p>
+          <p id="features" class="features"></p>
+          <label id="noise-control" class="range-control" for="noise-level" hidden>
+            <span>干扰强度 <output id="noise-readout" for="noise-level">原始信号</output></span>
+            <input id="noise-level" type="range" min="0" max="3" step="1" value="0">
+          </label>
           <p id="comparison" class="comparison"></p>
           <div class="actions">
             <button id="noise" type="button" class="secondary">增加干扰</button>
@@ -98,6 +122,17 @@
         <div class="table-wrap"><table id="matrix"></table></div>
         <p id="experiment-note" class="muted"></p>
         <p class="muted">早期版本取首尾单点之差。当前版本比较前 4 点与后 5 点的均值，再让最相近的 5 个样本投票。两版均使用同一批训练案例。</p>
+        <details class="advanced-study" id="advanced-study">
+          <summary><span><strong>进阶实验 · 七类识别</strong><small>280 个测试案例 × 四档干扰</small></span><span aria-hidden="true" class="expand">＋</span></summary>
+          <div class="study-body">
+            <p>训练集 840 个案例。只有同时找全两项故障，组合场景才算答对。</p>
+            <div class="metric-grid" id="advanced-metrics"></div>
+            <label class="matrix-control" for="matrix-level">错判分布
+              <select id="matrix-level"><option value="0">原始信号</option><option value="1">轻度干扰</option><option value="2" selected>中度干扰</option><option value="3">重度干扰</option></select>
+            </label>
+            <div class="table-wrap"><table id="advanced-matrix"></table></div>
+          </div>
+        </details>
       </div>
     </details>
     <footer>课堂模拟作品 · 遥测数值与故障均由程序生成</footer>

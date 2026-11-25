@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  FAULTS, generateCase, addInterference, classify, evaluate, splitCases,
+  FAULTS, SCENARIOS, generateCase, addInterference, classify, evaluate, splitCases,
+  diagnoseAdvanced, evaluateAdvanced, scenarioId,
 } from "./model.mjs";
 
 test("a case is reproducible and adding interference preserves its original data and label", () => {
@@ -16,6 +17,33 @@ test("a case is reproducible and adding interference preserves its original data
   assert.deepEqual(addInterference(original), noisy);
   assert.equal(original.frames.length, 18);
   assert.ok(noisy.frames.every(frame => frame.every(value => Number.isFinite(value) && value >= 0 && value <= 100)));
+});
+
+test("advanced diagnostics accept normal and every distinct pair", () => {
+  assert.equal(scenarioId(["none"]), "none");
+  assert.equal(scenarioId(["signal", "thermal"]), "thermal+signal");
+  assert.equal(scenarioId(["none", "power"]), null);
+  assert.equal(scenarioId(["thermal", "power", "signal"]), null);
+  assert.equal(SCENARIOS.length, 7);
+  for (const scenario of SCENARIOS) {
+    const sample = generateCase(12001, scenario.id);
+    assert.equal(sample.events.length, scenario.members.length);
+    assert.equal(diagnoseAdvanced(sample.frames).ranking.length, 7);
+    assert.equal(addInterference(sample, 0), sample);
+    assert.deepEqual(addInterference(sample, 3).events, sample.events);
+    assert.notDeepEqual(addInterference(sample, 1).frames, addInterference(sample, 3).frames);
+  }
+});
+
+test("advanced noise experiment uses the same 280 labelled cases at each level", () => {
+  const study = evaluateAdvanced();
+  assert.equal(study.total, 280);
+  assert.equal(study.levels.length, 4);
+  for (const level of study.levels) {
+    assert.equal(level.matrix.length, 7);
+    assert.ok(level.matrix.every(row => row.reduce((a, b) => a + b, 0) === 40));
+    assert.equal(level.correct, level.matrix.reduce((sum, row, i) => sum + row[i], 0));
+  }
 });
 
 test("prediction reads telemetry without the true label", () => {
